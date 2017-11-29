@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:mock="http://www.mulesoft.org/schema/mule/mock" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/mock http://www.mulesoft.org/schema/mule/mock/current/mule-mock.xsd">
+    <munit:config name="munit" doc:name="MUnit configuration"/>
+    <spring:beans>
+        <spring:import resource="classpath:company-stocks.xml"/>
+    </spring:beans>
+    <munit:test name="company-stocks-test-suite-company-stocksFlow-pesquisaTest" description="Test">
+        <mock:when messageProcessor=".*:set-variable" doc:name="Mock">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['setSymbol']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[flowVars.symbol = 'GOOGL']"/>
+        </mock:when>
+        <flow-ref name="company-stocksFlow-pesquisa" doc:name="Flow-ref to company-stocksFlow-pesquisa"/>
+        <munit:assert-true message="Should contains a company LookupResultList" condition="#[payload != '' &amp;&amp; payload.length() &gt; 0 &amp;&amp; payload.contains(&quot;LookupResultList&quot;)]" doc:name="Assert True"/>
+    </munit:test>
+    <munit:test name="company-stocks-test-suite-company-stocksFlow-precoTest" description="Test">
+        <mock:when messageProcessor=".*:set-variable" doc:name="Mock">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['setSymbol']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[flowVars.symbol = 'GOOGL']"/>
+        </mock:when>
+        <flow-ref name="company-stocksFlow-preco" doc:name="Flow-ref to company-stocksFlow-preco"/>
+        <munit:assert-true condition="#[payload != '' &amp;&amp; payload.length() &gt; 0 &amp;&amp; payload.contains(&quot;StockQuote&quot;)  &amp;&amp; payload.contains(&quot;StockQuote&quot;) &amp;&amp; payload.contains(&quot;\&quot;Status\&quot; : \&quot;SUCCESS\&quot;&quot;)  ]" doc:name="Assert True"/>
+    </munit:test>
+</mule>

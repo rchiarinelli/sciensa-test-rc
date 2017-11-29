@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <http:request-config name="HTTP_Request_Configuration" host="dev.markitondemand.com" port="80" doc:name="HTTP Request Configuration"/>
+    <flow name="company-stocksFlow-pesquisa">
+        <http:listener config-ref="customer-services-httpListenerConfig" path="/api/banco/mercado/pesquisa" allowedMethods="GET" doc:name="HTTP"/>
+        <set-variable variableName="symbol" value="#[message.inboundProperties.'http.query.params'.get('codigo')]" doc:name="setSymbol"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/MODApis/Api/v2/Lookup" method="GET" doc:name="QueryStockByName">
+            <http:request-builder>
+                <http:query-param paramName="input" value="#[flowVars.symbol]"/>
+            </http:request-builder>
+        </http:request>
+        <logger level="INFO" doc:name="Logger"/>
+        <json:xml-to-json-transformer doc:name="XML to JSON"/>
+    </flow>
+    <flow name="company-stocksFlow-preco">
+        <http:listener config-ref="customer-services-httpListenerConfig" path="/api/banco/mercado/preco" allowedMethods="GET" doc:name="HTTP"/>
+        <set-variable variableName="symbol" value="#[message.inboundProperties.'http.query.params'.get('codigo')]" doc:name="setSymbol"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/MODApis/Api/v2/Quote" method="GET" doc:name="QueryStockPrice">
+            <http:request-builder>
+                <http:query-param paramName="symbol" value="#[flowVars.symbol]"/>
+            </http:request-builder>
+        </http:request>
+        <logger level="INFO" doc:name="Logger"/>
+        <json:xml-to-json-transformer doc:name="XML to JSON"/>
+    </flow>
+</mule>
